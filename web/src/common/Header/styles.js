@@ -10,6 +10,8 @@ export const Container = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  border-bottom: 1px solid var(--gray-300);
+  background-color: #fff;
 `;
 
 export const Left = styled.div`
