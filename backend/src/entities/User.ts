@@ -14,7 +14,7 @@ export default class User {
   @Column()
   email!: string
 
-  @OneToMany(() => Idea, idea => idea.owner)
+  @OneToMany(() => Idea, idea => idea.author)
   created_ideas!: Idea[]
 
   @ManyToMany(() => Idea)

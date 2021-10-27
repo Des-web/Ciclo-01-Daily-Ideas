@@ -5,46 +5,41 @@ import CollectionRepository from "./repositories/CollectionRepository"
 import TagRepository from "./repositories/TagRepository"
 import User from "./entities/User"
 import Idea from "./entities/Idea"
+import Collection from "./entities/Collection"
+
+import { 
+  IGetUserArgs,
+  IGetIdeaArgs,
+  ICreateProfileArgs,
+  IEditProfileArgs,
+  ICreateIdeaArgs,
+  IAddTagArgs,
+  ICreateCollectionArgs,
+  IAddIdeaToCollection,
+  ILikeUnlikeIdea,
+} from "./types/resolvers"
 
 const userRepository = getCustomRepository(UserRepository)
 const ideaRepository = getCustomRepository(IdeaRepository)
 const collectionRepository = getCustomRepository(CollectionRepository)
 const tagRepository = getCustomRepository(TagRepository)
 
-interface ICreateProfileArgs {
-  name: string
-  email: string
-}
-
-interface ICreateIdeaArgs {
-  title: string
-  content: string
-  author_id: number
-}
-
-interface ICreateCollectionArgs {
-  name: string
-  description: string
-  author_id: number
-}
-
-interface IEditProfileArgs {
-  user_id: number
-  name?: string
-  email?: string
-}
-
-interface IAddTagArgs {
-  idea_id: number
-  name: string
-}
-
 const resolvers = {
   Query: {
     getUsers: async () => {
       const users = await userRepository.find()
       return users
-    }
+    },
+
+    getUser: async (_: any, { user_id }: IGetUserArgs) => {
+      const user = await userRepository.findOne(user_id)
+      return user
+    },
+
+    getIdea: async (_: any, { idea_id }: IGetIdeaArgs) => {
+      const idea = await ideaRepository.findOne(idea_id)
+      return idea
+    },
   },
 
   Mutation: {
@@ -86,26 +81,13 @@ const resolvers = {
       return idea
     },
 
-    createCollection: async (_: any, {
-      name,
-      description,
-      author_id
-    }: ICreateCollectionArgs) => {
-      console.log(name)
-      console.log(description)
-      console.log(author_id)
-      const user = await userRepository.findOne(author_id)
-      const collection = collectionRepository.create({
-        name,
-        description,
-      })
-      collection.owner = user as User
-      await collectionRepository.save(collection)
-      return collection
-    },
-
     addTagToIdea: async (_: any, { idea_id, name }: IAddTagArgs) => {
-      const idea = await ideaRepository.findOne(idea_id)
+      const idea = await ideaRepository.findOne(idea_id, {
+        relations: ['tags']
+      })
+
+      if(!idea) return
+
       let tag = await tagRepository.findOne({
         where: {
           name
@@ -118,14 +100,90 @@ const resolvers = {
         })
       }
 
-      const oldTags = idea?.tags
-      if(oldTags && oldTags.includes(tag)) {
-        return idea
+      const tags = idea.tags
+      if(tags) {
+        const tagAlreadyIncluded = tags.find(item => item.id === tag!.id)
+        idea.tags = tagAlreadyIncluded ? tags : [...tags, tag]
+
+      } else {
+        idea.tags = [tag]
       }
-      idea!.tags = oldTags ? [...oldTags, tag] : [tag]
 
       await ideaRepository.save(idea as Idea)
       await tagRepository.save(tag)
+
+      return idea
+    },
+
+    createCollection: async (_: any, {
+      name,
+      description,
+      author_id
+    }: ICreateCollectionArgs) => {
+      const user = await userRepository.findOne(author_id)
+      const collection = collectionRepository.create({
+        name,
+        description,
+        owner: user
+      })
+      await collectionRepository.save(collection)
+      return collection
+    },
+
+    addIdeaToCollection: async(_: any, {
+      idea_id,
+      collection_id
+    }: IAddIdeaToCollection) => {
+      const collection = await collectionRepository.findOne(collection_id, {
+        relations: ['ideas']
+      })
+      const idea = await ideaRepository.findOne(idea_id)
+
+      if(!idea || !collection) {
+        return
+      }
+      
+      const ideas = collection.ideas
+      if(ideas) {
+        const ideaAlreadyIncluded = ideas.find(element => element.id === idea.id)
+        collection.ideas = ideaAlreadyIncluded ? ideas : [...ideas, idea]
+
+      } else {
+        collection.ideas = [idea]
+      }
+
+      await collectionRepository.save(collection as Collection)
+      return collection
+    },
+
+    likeUnlikeIdea: async (_: any, {
+      idea_id,
+      user_id
+    }: ILikeUnlikeIdea) => {
+      const idea = await ideaRepository.findOne(idea_id, {
+        relations: ['likes']
+      })
+      const user = await userRepository.findOne(user_id)
+      
+      if(!idea || !user) {
+        return
+      }
+
+      const likes = idea.likes
+      if(likes) {
+        const userIndex = likes.findIndex(item => item.id === user.id)
+        
+        // Adds user to array or removes it if already exists 
+        if(userIndex === -1) {
+          idea.likes = [...likes, user]
+        } else {
+          idea.likes.splice(userIndex)
+        }
+      } else {
+        idea.likes = [user]
+      }
+
+      await ideaRepository.save(idea)
       return idea
     }
   }

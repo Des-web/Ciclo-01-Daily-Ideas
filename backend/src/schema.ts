@@ -4,6 +4,8 @@ import { gql } from 'apollo-server-express'
 const typeDefs = gql`
   type Query {
     getUsers: [User]!
+    getUser(user_id: ID!): User
+    getIdea(idea_id: ID!): Idea
   }
 
   "A User represents one's account"
@@ -47,18 +49,25 @@ const typeDefs = gql`
 
   type Mutation {
     "Creates a User Profile"
-    createProfile(name: String, email: String): User
+    createProfile(name: String!, email: String!): User
 
     "Edits a User Profile"
-    editProfile(user_id: ID, name: String, email: String): User
+    editProfile(user_id: ID!, name: String!, email: String!): User
 
     "Creates an Idea by an User"
-    createIdea(title: String, content: String, author_id: ID): Idea
+    createIdea(title: String!, content: String!, author_id: ID!): Idea
+
+    "Adds Tag to a Post"
+    addTagToIdea(idea_id: ID!, name: String!): Idea
 
     "Creates a Collection by an User"
-    createCollection(name: String, description: String, author_id: ID): Collection
+    createCollection(name: String, description: String, author_id: ID!): Collection
 
-    addTagToIdea(idea_id: ID, name: String): Idea
+    "Adds Idea to Collection"
+    addIdeaToCollection(idea_id: ID!, collection_id: ID!): Collection
+
+    "Likes Idea"
+    likeUnlikeIdea(idea_id: ID!, user_id: ID!): Idea
   }
 `
 
