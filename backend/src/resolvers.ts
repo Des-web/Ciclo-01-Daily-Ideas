@@ -39,6 +39,16 @@ const resolvers = {
       return users
     },
 
+    getIdeas: async () => {
+      const ideas = await ideaRepository.find({
+        relations: ['author'],
+        order: {
+          created_at: "DESC"
+        }
+      })
+      return ideas
+    },
+    
     getUser: async (_: any, { user_id }: IGetUserArgs) => {
       const user = await userRepository.findOne(user_id)
       return user

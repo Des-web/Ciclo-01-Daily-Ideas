@@ -4,6 +4,7 @@ import { gql } from 'apollo-server-express'
 const typeDefs = gql`
   type Query {
     getUsers: [User]!
+    getIdeas: [Idea]!
     getUser(user_id: ID!): User
     getIdea(idea_id: ID!): Idea
   }
@@ -26,7 +27,7 @@ const typeDefs = gql`
     created_at: String
     updated_at: String
     tags: [Tag]!
-    author: User
+    author: User!
     likes: [User]!
   }
 
