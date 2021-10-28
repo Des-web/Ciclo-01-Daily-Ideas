@@ -47,6 +47,13 @@ const typeDefs = gql`
     owner: User!
   }
 
+  type Comment {
+    id: ID!
+    author: User!
+    idea: Idea!
+    content: String!
+  }
+
   type Mutation {
     "Creates a User Profile"
     createProfile(name: String!, email: String!): User
@@ -71,6 +78,15 @@ const typeDefs = gql`
 
     "Adds/removes User as Follower of another"
     followUser(user_id: ID!, follower_id: ID!): User
+
+    "Add a Comment by an User on one Idea"
+    commentIdea(user_id: ID!, idea_id: ID!, content: String!): Comment
+
+    "Edit a Comment by an User on one Idea"
+    editComment(comment_id: ID!, content: String!): Comment
+
+    "Delete a Comment by an User on one Idea"
+    deleteComment(comment_id: ID!): Comment
   }
 `
 

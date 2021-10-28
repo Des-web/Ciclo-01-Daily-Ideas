@@ -1,4 +1,5 @@
 import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import Comment from './Comment';
 import Tag from './Tag';
 import User from './User';
 
@@ -31,4 +32,7 @@ export default class Idea {
   @ManyToMany(() => User)
   @JoinTable({ name: 'idea_like' })
   likes!: User[]
+
+  @OneToMany(() => Comment, comment => comment.idea)
+  comments!: Comment[]
 }

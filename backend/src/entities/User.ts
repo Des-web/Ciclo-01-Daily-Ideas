@@ -1,5 +1,6 @@
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import Collection from './Collection'
+import Comment from './Comment'
 import Idea from './Idea'
 
 @Entity('User')
@@ -32,4 +33,7 @@ export default class User {
     }
   })
   followers!: User[]
+
+  @OneToMany(() => Comment, comment => comment.author)
+  comments!: Comment[]
 }
