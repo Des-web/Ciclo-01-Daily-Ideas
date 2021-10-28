@@ -3,6 +3,7 @@ import UserRepository from "./repositories/UserRepository"
 import IdeaRepository from "./repositories/IdeaRepository"
 import CollectionRepository from "./repositories/CollectionRepository"
 import TagRepository from "./repositories/TagRepository"
+import CommentRepository from "./repositories/CommentRepository"
 import User from "./entities/User"
 import Idea from "./entities/Idea"
 import Collection from "./entities/Collection"
@@ -17,12 +18,17 @@ import {
   ICreateCollectionArgs,
   IAddIdeaToCollection,
   ILikeUnlikeIdea,
+  IFollowUser,
+  ICommentIdea,
+  IEditComment,
+  IDeleteComment,
 } from "./types/resolvers"
 
 const userRepository = getCustomRepository(UserRepository)
 const ideaRepository = getCustomRepository(IdeaRepository)
 const collectionRepository = getCustomRepository(CollectionRepository)
 const tagRepository = getCustomRepository(TagRepository)
+const commentRepository = getCustomRepository(CommentRepository)
 
 const resolvers = {
   Query: {
@@ -185,7 +191,86 @@ const resolvers = {
 
       await ideaRepository.save(idea)
       return idea
-    }
+    },
+
+    followUser: async (_: any, {
+      user_id,
+      follower_id
+    }: IFollowUser) => {
+      const user = await userRepository.findOne(user_id, {
+        relations: ['followers']
+      })
+      const follower = await userRepository.findOne(follower_id)
+
+      if(!user || !follower) {
+        return
+      }
+
+      const followers = user.followers
+      if(followers) {
+        const followerIndex = followers.findIndex(item => item.id === follower.id)
+
+        // Adds follower to array or removes it if already exists 
+        if(followerIndex === -1) {
+          user.followers = [...followers, follower]
+        } else {
+          user.followers.splice(followerIndex)
+        }
+        
+      } else {
+        user.followers = [follower]
+      }
+
+      await userRepository.save(user)
+      return user
+    },
+
+    commentIdea: async (_: any, {
+      user_id,
+      idea_id,
+      content
+    } :ICommentIdea) => {
+      const user = await userRepository.findOne(user_id)
+      const idea = await ideaRepository.findOne(idea_id)
+
+      if(!user || !idea) {
+        return
+      }
+
+      const comment = commentRepository.create({
+        author: user,
+        idea: idea,
+        content
+      })
+
+      await commentRepository.save(comment)
+      return comment
+    },
+
+    editComment: async (_: any, {
+      comment_id,
+      content
+    }: IEditComment) => {
+      const comment = await commentRepository.findOne(comment_id) 
+
+      if(!comment) {
+        return
+      }
+
+      comment.content = content
+      await commentRepository.save(comment)
+      return comment
+    },
+
+    deleteComment: async(_: any, {
+      comment_id
+    }: IDeleteComment) => {
+      const comment = await commentRepository.findOne(comment_id)
+      if(comment) {
+        await commentRepository.delete(comment.id)
+      }
+      return
+    },
   }
 }
 

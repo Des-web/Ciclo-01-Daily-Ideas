@@ -1,7 +1,7 @@
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import Collection from './Collection'
+import Comment from './Comment'
 import Idea from './Idea'
-import UserSavedIdea from './UserSavedIdea'
 
 @Entity('User')
 export default class User {
@@ -16,11 +16,6 @@ export default class User {
 
   @OneToMany(() => Idea, idea => idea.author)
   created_ideas!: Idea[]
-
-  @ManyToMany(() => Idea)
-
-  @OneToMany(() => UserSavedIdea, savedIdea => savedIdea.user)
-  saved_ideas!:  UserSavedIdea[]
 
   @OneToMany(() => Collection, collection => collection.owner)
   collections!: Collection[]
@@ -38,4 +33,7 @@ export default class User {
     }
   })
   followers!: User[]
+
+  @OneToMany(() => Comment, comment => comment.author)
+  comments!: Comment[]
 }

@@ -38,3 +38,19 @@ export interface ILikeUnlikeIdea {
   idea_id: number
   user_id: number
 }
+export interface IFollowUser {
+  user_id: number
+  follower_id: number
+}
+export interface ICommentIdea {
+  user_id: number
+  idea_id: number
+  content: string
+}
+export interface IEditComment {
+  comment_id: number
+  content: string
+}
+export interface IDeleteComment {
+  comment_id: number
+}
