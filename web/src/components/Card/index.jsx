@@ -30,7 +30,7 @@ function Card() {
       <Stats>
         <Votes>
           <button onClick={() => (voted) ? setVoted(false) : setVoted(true)}>
-            <VoteIcon voted={voted}/>
+            <VoteIcon $voted={voted}/>
           </button>
           <span>5</span>
         </Votes>
