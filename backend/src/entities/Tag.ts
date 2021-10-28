@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm'
+import Idea from './Idea'
 
 @Entity('Tag')
 export default class Tag {
@@ -7,4 +8,8 @@ export default class Tag {
 
   @Column()
   name!: string
+
+  @ManyToMany(() => Idea)
+  @JoinTable({ name: 'idea_tag' })
+  ideas!: Idea[]
 }

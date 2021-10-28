@@ -5,6 +5,7 @@ import CollectionRepository from "./repositories/CollectionRepository"
 import TagRepository from "./repositories/TagRepository"
 import CommentRepository from "./repositories/CommentRepository"
 import User from "./entities/User"
+import Tag from "./entities/Tag"
 import Idea from "./entities/Idea"
 import Collection from "./entities/Collection"
 
@@ -15,6 +16,7 @@ import {
   IEditProfileArgs,
   ICreateIdeaArgs,
   IAddTagArgs,
+  IRemoveTagArgs,
   ICreateCollectionArgs,
   IAddIdeaToCollection,
   ILikeUnlikeIdea,
@@ -41,7 +43,7 @@ const resolvers = {
       const user = await userRepository.findOne(user_id)
       return user
     },
-
+    
     getIdea: async (_: any, { idea_id }: IGetIdeaArgs) => {
       const idea = await ideaRepository.findOne(idea_id)
       return idea
@@ -50,7 +52,10 @@ const resolvers = {
 
   Mutation: {
     // (parent, args, context, info) => {}
-    createProfile: async (_: any, { name, email }: ICreateProfileArgs) => {
+    createProfile: async (_: any, {
+      name,
+      email
+    }: ICreateProfileArgs) => {
       const user = userRepository.create({
         name,
         email,
@@ -87,7 +92,11 @@ const resolvers = {
       return idea
     },
 
-    addTagToIdea: async (_: any, { idea_id, name }: IAddTagArgs) => {
+    addTagToIdea: async (_: any, {
+      idea_id,
+      name
+    }: IAddTagArgs) => {
+      let upperCaseName = name.toUpperCase()
       const idea = await ideaRepository.findOne(idea_id, {
         relations: ['tags']
       })
@@ -96,28 +105,51 @@ const resolvers = {
 
       let tag = await tagRepository.findOne({
         where: {
-          name
-        }
+          name: upperCaseName
+        },
+        relations: ['ideas']
       })
 
       if(!tag) {
         tag = tagRepository.create({
-          name
+          name: upperCaseName
         })
+        await tagRepository.save(tag)
       }
 
       const tags = idea.tags
-      if(tags) {
-        const tagAlreadyIncluded = tags.find(item => item.id === tag!.id)
-        idea.tags = tagAlreadyIncluded ? tags : [...tags, tag]
-
-      } else {
-        idea.tags = [tag]
-      }
+      const tagAlreadyIncluded = tags.find(item => item.id === tag!.id)
+      idea.tags = tagAlreadyIncluded ? tags : [...tags, tag]
 
       await ideaRepository.save(idea as Idea)
-      await tagRepository.save(tag)
+      return idea
+    },
 
+    removeTagFromIdea: async (_: any, {
+      idea_id,
+      tag_id,
+    }: IRemoveTagArgs) => {
+      const idea = await ideaRepository.findOne(idea_id, {
+        relations: ['tags']
+      })
+
+      let tag = await tagRepository.findOne(tag_id, {
+        relations: ['ideas']
+      })
+      
+      if(!idea || !tag) return
+
+      idea.tags = idea.tags.filter(item => item.id !== tag!.id)
+      await ideaRepository.save(idea)
+
+      tag = await tagRepository.findOne(tag_id, {
+        relations: ['ideas']
+      })
+      
+      if(tag!.ideas.length === 0) {
+        tagRepository.remove(tag as Tag)
+      }
+      
       return idea
     },
 

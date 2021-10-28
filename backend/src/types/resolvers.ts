@@ -30,6 +30,10 @@ export interface IAddTagArgs {
   idea_id: number
   name: string
 }
+export interface IRemoveTagArgs {
+  idea_id: string
+  tag_id: string
+}
 export interface IAddIdeaToCollection {
   idea_id: number
   collection_id: number

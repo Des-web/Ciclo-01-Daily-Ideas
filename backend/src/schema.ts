@@ -67,6 +67,9 @@ const typeDefs = gql`
     "Adds Tag to a Post"
     addTagToIdea(idea_id: ID!, name: String!): Idea
 
+    "Removes a Tag from an Idea"
+    removeTagFromIdea(idea_id: ID!, tag_id: ID!): Idea
+
     "Creates a Collection by an User"
     createCollection(name: String, description: String, author_id: ID!): Collection
 
