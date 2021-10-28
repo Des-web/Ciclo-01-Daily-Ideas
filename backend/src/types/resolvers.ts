@@ -34,27 +34,27 @@ export interface IRemoveTagArgs {
   idea_id: string
   tag_id: string
 }
-export interface IAddIdeaToCollection {
+export interface IAddIdeaToCollectionArgs {
   idea_id: number
   collection_id: number
 }
-export interface ILikeUnlikeIdea {
+export interface ILikeUnlikeIdeaArgs {
   idea_id: number
   user_id: number
 }
-export interface IFollowUser {
+export interface IFollowUserArgs {
   user_id: number
   follower_id: number
 }
-export interface ICommentIdea {
+export interface ICommentIdeaArgs {
   user_id: number
   idea_id: number
   content: string
 }
-export interface IEditComment {
+export interface IEditCommentArgs {
   comment_id: number
   content: string
 }
-export interface IDeleteComment {
+export interface IDeleteCommentArgs {
   comment_id: number
 }

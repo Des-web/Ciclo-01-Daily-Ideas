@@ -18,12 +18,12 @@ import {
   IAddTagArgs,
   IRemoveTagArgs,
   ICreateCollectionArgs,
-  IAddIdeaToCollection,
-  ILikeUnlikeIdea,
-  IFollowUser,
-  ICommentIdea,
-  IEditComment,
-  IDeleteComment,
+  IAddIdeaToCollectionArgs,
+  ILikeUnlikeIdeaArgs,
+  IFollowUserArgs,
+  ICommentIdeaArgs,
+  IEditCommentArgs,
+  IDeleteCommentArgs,
 } from "./types/resolvers"
 
 const userRepository = getCustomRepository(UserRepository)
@@ -171,7 +171,7 @@ const resolvers = {
     addIdeaToCollection: async(_: any, {
       idea_id,
       collection_id
-    }: IAddIdeaToCollection) => {
+    }: IAddIdeaToCollectionArgs) => {
       const collection = await collectionRepository.findOne(collection_id, {
         relations: ['ideas']
       })
@@ -197,7 +197,7 @@ const resolvers = {
     likeUnlikeIdea: async (_: any, {
       idea_id,
       user_id
-    }: ILikeUnlikeIdea) => {
+    }: ILikeUnlikeIdeaArgs) => {
       const idea = await ideaRepository.findOne(idea_id, {
         relations: ['likes']
       })
@@ -228,7 +228,7 @@ const resolvers = {
     followUser: async (_: any, {
       user_id,
       follower_id
-    }: IFollowUser) => {
+    }: IFollowUserArgs) => {
       const user = await userRepository.findOne(user_id, {
         relations: ['followers']
       })
@@ -261,7 +261,7 @@ const resolvers = {
       user_id,
       idea_id,
       content
-    } :ICommentIdea) => {
+    } :ICommentIdeaArgs) => {
       const user = await userRepository.findOne(user_id)
       const idea = await ideaRepository.findOne(idea_id)
 
@@ -282,7 +282,7 @@ const resolvers = {
     editComment: async (_: any, {
       comment_id,
       content
-    }: IEditComment) => {
+    }: IEditCommentArgs) => {
       const comment = await commentRepository.findOne(comment_id) 
 
       if(!comment) {
@@ -296,7 +296,7 @@ const resolvers = {
 
     deleteComment: async(_: any, {
       comment_id
-    }: IDeleteComment) => {
+    }: IDeleteCommentArgs) => {
       const comment = await commentRepository.findOne(comment_id)
       if(comment) {
         await commentRepository.delete(comment.id)
