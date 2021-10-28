@@ -66,8 +66,11 @@ const typeDefs = gql`
     "Adds Idea to Collection"
     addIdeaToCollection(idea_id: ID!, collection_id: ID!): Collection
 
-    "Likes Idea"
+    "Adds/removes Likes to an Idea"
     likeUnlikeIdea(idea_id: ID!, user_id: ID!): Idea
+
+    "Adds/removes User as Follower of another"
+    followUser(user_id: ID!, follower_id: ID!): User
   }
 `
 

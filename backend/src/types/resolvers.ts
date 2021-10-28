@@ -38,3 +38,7 @@ export interface ILikeUnlikeIdea {
   idea_id: number
   user_id: number
 }
+export interface IFollowUser {
+  user_id: number
+  follower_id: number
+}

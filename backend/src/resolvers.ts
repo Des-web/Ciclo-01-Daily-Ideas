@@ -17,6 +17,7 @@ import {
   ICreateCollectionArgs,
   IAddIdeaToCollection,
   ILikeUnlikeIdea,
+  IFollowUser,
 } from "./types/resolvers"
 
 const userRepository = getCustomRepository(UserRepository)
@@ -185,7 +186,39 @@ const resolvers = {
 
       await ideaRepository.save(idea)
       return idea
-    }
+    },
+
+    followUser: async (_: any, {
+      user_id,
+      follower_id
+    }: IFollowUser) => {
+      const user = await userRepository.findOne(user_id, {
+        relations: ['followers']
+      })
+      const follower = await userRepository.findOne(follower_id)
+
+      if(!user || !follower) {
+        return
+      }
+
+      const followers = user.followers
+      if(followers) {
+        const followerIndex = followers.findIndex(item => item.id === follower.id)
+
+        // Adds follower to array or removes it if already exists 
+        if(followerIndex === -1) {
+          user.followers = [...followers, follower]
+        } else {
+          user.followers.splice(followerIndex)
+        }
+        
+      } else {
+        user.followers = [follower]
+      }
+
+      await userRepository.save(user)
+      return user
+    },
   }
 }
 
