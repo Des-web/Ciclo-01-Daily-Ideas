@@ -64,7 +64,7 @@ export const VoteIcon = styled(GoArrowUp)`
   height: 24px;
   width: 24px;
   
-  fill: ${(props) => props.voted ? "var(--primary)" : "var(--gray-400)"};
+  fill: ${(props) => props.$voted ? "var(--primary)" : "var(--gray-400)"};
 `;
 
 export const CommentIcon = styled(GoComment)`
